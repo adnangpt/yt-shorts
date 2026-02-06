@@ -42,6 +42,13 @@ jobs:
         run: |
           npm install
 
+      - name: Create Cookies File
+        if: env.YOUTUBE_COOKIES != ''
+        env:
+          YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
+        run: |
+          echo "$YOUTUBE_COOKIES" > cookies.txt
+
       - name: Run Processing Pipeline
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

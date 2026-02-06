@@ -14,7 +14,10 @@ async function downloadVideo(url, outputDir) {
 
     try {
         console.log('Downloading video stream...');
-        execSync(`yt-dlp -f "bestvideo[ext=mp4][height<=720]+bestaudio[ext=m4a]/best[ext=mp4]/best" --merge-output-format mp4 "${url}" -o "${videoPath}"`, { stdio: 'inherit' });
+        const cookiesPath = path.join(process.cwd(), 'cookies.txt');
+        const cookiesArg = fs.existsSync(cookiesPath) ? `--cookies "${cookiesPath}"` : '';
+        
+        execSync(`yt-dlp ${cookiesArg} -f "bestvideo[ext=mp4][height<=720]+bestaudio[ext=m4a]/best[ext=mp4]/best" --merge-output-format mp4 "${url}" -o "${videoPath}"`, { stdio: 'inherit' });
 
         console.log('Extracting audio for transcription...');
         execSync(`ffmpeg -i "${videoPath}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "${audioPath}"`, { stdio: 'inherit' });
