@@ -3,10 +3,10 @@ import { getWorkflowStatus } from '@/lib/github';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const jobId = params.id;
+        const { id: jobId } = await params;
         const status = await getWorkflowStatus(jobId);
 
         return NextResponse.json(status);
