@@ -1,0 +1,59 @@
+name: Process YouTube Short
+
+on:
+  repository_dispatch:
+    types: [process_video]
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install yt-dlp
+        run: |
+          python3 -m pip install yt-dlp
+
+      - name: Install Whisper
+        run: |
+          python3 -m pip install openai-whisper setuptools-rust
+
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      - name: Run Processing Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_URL: ${{ github.event.client_payload.url }}
+          JOB_ID: ${{ github.event.client_payload.jobId }}
+        run: |
+          node worker-scripts/main.js "$YOUTUBE_URL" "$JOB_ID"
+
+      - name: Upload Shorts as Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts-${{ github.event.client_payload.jobId }}
+          path: temp/${{ github.event.client_payload.jobId }}/
+          retention-days: 7
