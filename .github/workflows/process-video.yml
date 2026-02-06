@@ -48,6 +48,9 @@ jobs:
           YOUTUBE_URL: ${{ github.event.client_payload.url }}
           JOB_ID: ${{ github.event.client_payload.jobId }}
         run: |
+          echo "Debug: YOUTUBE_URL=$YOUTUBE_URL"
+          echo "Debug: JOB_ID=$JOB_ID"
+          echo "Debug: GEMINI_API_KEY is set: $( [ -n \"$GEMINI_API_KEY\" ] && echo 'YES' || echo 'NO' )"
           node worker-scripts/main.js "$YOUTUBE_URL" "$JOB_ID"
 
       - name: Upload Shorts as Artifacts
