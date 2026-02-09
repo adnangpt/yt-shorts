@@ -15,7 +15,9 @@ async function downloadVideo(url, outputDir) {
     try {
         console.log('Downloading video stream...');
         const cookiesPath = path.join(process.cwd(), 'cookies.txt');
-        const cookiesArg = fs.existsSync(cookiesPath) ? `--cookies "${cookiesPath}"` : '';
+        const hasCookies = fs.existsSync(cookiesPath);
+        console.log(`Debug: cookies.txt exists: ${hasCookies}`);
+        const cookiesArg = hasCookies ? `--cookies "${cookiesPath}"` : '';
         
         execSync(`yt-dlp ${cookiesArg} -f "bestvideo[ext=mp4][height<=720]+bestaudio[ext=m4a]/best[ext=mp4]/best" --merge-output-format mp4 "${url}" -o "${videoPath}"`, { stdio: 'inherit' });
 
