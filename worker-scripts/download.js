@@ -19,7 +19,8 @@ async function downloadVideo(url, outputDir) {
         console.log(`Debug: cookies.txt exists: ${hasCookies}`);
         const cookiesArg = hasCookies ? `--cookies "${cookiesPath}"` : '';
         
-        execSync(`yt-dlp ${cookiesArg} -f "bestvideo[ext=mp4][height<=720]+bestaudio[ext=m4a]/best[ext=mp4]/best" --merge-output-format mp4 "${url}" -o "${videoPath}"`, { stdio: 'inherit' });
+        // Use web player client and more flexible format selection
+        execSync(`yt-dlp ${cookiesArg} --extractor-args "youtube:player_client=web" -f "bv*[height<=720]+ba/b[height<=720]/bv*+ba/b" --merge-output-format mp4 "${url}" -o "${videoPath}"`, { stdio: 'inherit' });
 
         console.log('Extracting audio for transcription...');
         execSync(`ffmpeg -i "${videoPath}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "${audioPath}"`, { stdio: 'inherit' });
