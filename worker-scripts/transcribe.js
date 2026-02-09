@@ -4,7 +4,7 @@ const fs = require('fs');
 
 async function transcribeAudio(audioPath, outputDir) {
     console.log(`Transcribing audio: ${audioPath}`);
-    const model = 'base';
+    const model = 'medium'; // Using medium model for better multilingual support (Hindi, Urdu, Punjabi, Hinglish)
     try {
         console.log(`Running Whisper (${model} model)...`);
         execSync(`whisper "${audioPath}" --model ${model} --output_dir "${outputDir}" --output_format all`, { stdio: 'inherit' });

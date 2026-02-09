@@ -1,36 +1,173 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YouTube Shorts Automation Platform
 
-## Getting Started
+Automatically convert long-form YouTube videos into viral short-form clips using AI analysis and video processing.
 
-First, run the development server:
+## ✨ Features
+
+- 🎬 **Automatic Video Download**: Downloads YouTube videos using `yt-dlp`
+- 🎙️ **AI Transcription**: Uses OpenAI Whisper for accurate multilingual transcription (English, Hindi, Urdu, Punjabi, Hinglish)
+- 🤖 **Smart Clip Selection**: Gemini AI analyzes transcripts to find the most viral moments
+- 🎨 **Professional Processing**: Creates vertical 9:16 shorts with blurred backgrounds
+- 🌐 **Web Interface**: Next.js dashboard for easy job submission and tracking
+- ⚡ **GPU Acceleration**: Supports NVIDIA GPUs for 10-20x faster transcription
+
+## 🚀 Quick Start
+
+### Windows (Gaming Laptop - Recommended)
+
+1. **Clone the repository**:
+   ```powershell
+   git clone https://github.com/adnangpt/yt-shorts.git
+   cd yt-shorts
+   ```
+
+2. **Run setup script** (as Administrator):
+   ```powershell
+   .\setup_windows.ps1
+   ```
+
+3. **Set your Gemini API key**:
+   ```powershell
+   $env:GEMINI_API_KEY="your_api_key_here"
+   ```
+
+4. **Process a video**:
+   ```powershell
+   node worker-scripts/main.js "https://youtu.be/VIDEO_ID" "job_name"
+   ```
+
+### Linux/Ubuntu
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/adnangpt/yt-shorts.git
+   cd yt-shorts
+   ```
+
+2. **Run setup script**:
+   ```bash
+   bash setup_local.sh
+   ```
+
+3. **Set your Gemini API key**:
+   ```bash
+   export GEMINI_API_KEY="your_api_key_here"
+   ```
+
+4. **Process a video**:
+   ```bash
+   node worker-scripts/main.js "https://youtu.be/VIDEO_ID" "job_name"
+   ```
+
+## 🌐 Web Interface
+
+Start the Next.js development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Note**: The web interface currently triggers GitHub Actions. For local processing, use the command-line worker directly.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📋 Requirements
 
-## Learn More
+- **Node.js** 18+ 
+- **Python** 3.8+
+- **FFmpeg**
+- **yt-dlp**
+- **OpenAI Whisper**
+- **Gemini API Key** (Get from [Google AI Studio](https://aistudio.google.com/))
 
-To learn more about Next.js, take a look at the following resources:
+## ⚙️ Configuration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a `.env.local` file:
 
-## Deploy on Vercel
+```env
+GEMINI_API_KEY=your_gemini_api_key
+GITHUB_PAT=your_github_token (optional, for GitHub Actions)
+GITHUB_OWNER=your_username
+GITHUB_REPO=yt-shorts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### YouTube Cookies (Optional)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If you encounter YouTube bot detection:
+
+1. Export cookies from your browser using a cookie extension
+2. Save as `cookies.txt` in the project root
+3. The tool will automatically use them
+
+## 🎯 How It Works
+
+1. **Download**: Uses `yt-dlp` to download the YouTube video
+2. **Transcribe**: Extracts audio and transcribes with Whisper (medium model for multilingual support)
+3. **Analyze**: Gemini AI analyzes the transcript to find viral moments (Q&A loops, emotional peaks, etc.)
+4. **Process**: FFmpeg creates vertical shorts with:
+   - 9:16 aspect ratio (1080x1920)
+   - Blurred background
+   - Centered video
+   - No subtitles (add your own in CapCut)
+
+## 🚀 Performance Tips
+
+### GPU Acceleration (Windows/Linux with NVIDIA GPU)
+
+The setup scripts automatically detect and configure GPU acceleration. With a gaming laptop GPU:
+- **10-minute video**: ~1-2 minutes transcription (vs 15+ minutes on CPU)
+- **Recommended**: RTX 3060 or better
+
+### Model Selection
+
+- **Medium model** (default): Best for multilingual content (Hindi, Urdu, Punjabi, Hinglish)
+- **Base model**: Faster, good for English-only content
+- **Large model**: Most accurate, but very slow
+
+## 📁 Output Structure
+
+```
+temp/
+└── job_name/
+    ├── video.mp4          # Downloaded video
+    ├── audio.wav          # Extracted audio
+    ├── audio.txt          # Full transcript
+    ├── audio.srt          # Subtitle file
+    ├── result.json        # AI analysis results
+    ├── short_1.mp4        # First viral clip
+    ├── short_2.mp4        # Second viral clip
+    └── short_3.mp4        # Third viral clip
+```
+
+## 🐛 Troubleshooting
+
+### "yt-dlp/ffmpeg/whisper is not recognized"
+
+**Windows**: Restart PowerShell after running `setup_windows.ps1`
+
+**Linux**: Run `source ~/.bashrc` or restart your terminal
+
+### YouTube Bot Detection
+
+1. Export fresh cookies from your browser
+2. Save as `cookies.txt` in project root
+3. Re-run the worker
+
+### Slow Transcription
+
+- Use GPU acceleration (see setup scripts)
+- Switch to `base` model for English-only content
+- Process shorter videos (5-7 minutes)
+
+## 📝 License
+
+MIT
+
+## 🙏 Credits
+
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Video downloading
+- [OpenAI Whisper](https://github.com/openai/whisper) - Transcription
+- [Google Gemini](https://ai.google.dev/) - AI analysis
+- [FFmpeg](https://ffmpeg.org/) - Video processing

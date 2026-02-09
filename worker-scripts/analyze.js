@@ -3,20 +3,26 @@ const fs = require('fs');
 async function analyzeTranscript(transcript, apiKey) {
     console.log('Analyzing transcript for viral moments...');
     const prompt = `
-You are a professional viral short form video editor.
-Analyze transcript and select top viral segments.
+You are a professional viral short-form video editor.
+Analyze the transcript and identify the top 3 most engaging segments that would work well as standalone short videos.
 
-Focus on:
-- Emotional spikes
-- Story payoff moments
-- Controversial opinions
-- Funny punchlines
-- Motivational moments
+This content could be from any source: podcasts, news, documentaries, educational videos, comedy, interviews, or any other format.
+The transcript may be in any language (English, Hindi, Punjabi, etc.).
+
+Focus on identifying:
+- **High-impact moments**: Emotional peaks, surprising revelations, or powerful statements
+- **Complete thoughts**: Segments that tell a complete mini-story or idea
+- **Viral potential**: Controversial opinions, funny moments, motivational insights, or dramatic payoffs
+- **Question-Answer loops** (if applicable): Start with context/question, end with the complete answer
+- **Standalone value**: Each clip should make sense without needing the full video
 
 Clip Rules:
-- Minimum duration: 20 seconds
-- Maximum duration: 60 seconds
-- Prefer 30–45 seconds
+- **STRICT MAXIMUM**: 60 seconds
+- **Minimum**: 15 seconds
+- **Optimal**: 30-45 seconds
+- Prioritize the "payoff" (punchline, answer, insight, climax) over long setup
+- If context is too long, trim the beginning but keep the segment understandable
+- Each clip must feel complete and satisfying
 
 Transcript:
 ${transcript}
@@ -28,14 +34,14 @@ Format:
     "start_time": "HH:MM:SS",
     "end_time": "HH:MM:SS",
     "viral_score": 0-100,
-    "title": "Short hook title",
-    "reason": "Why viral"
+    "title": "Catchy hook title",
+    "reason": "Why this segment is viral-worthy"
   }
 ]
-Return top 3 segments.
+Return exactly 3 segments, ranked by viral_score.
 `;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     const response = await fetch(geminiUrl, {
         method: 'POST',
@@ -52,6 +58,18 @@ Return top 3 segments.
     }
 
     const data = await response.json();
+    
+    // Robust error handling for Gemini API response
+    if (!data.candidates || data.candidates.length === 0) {
+        console.error('Gemini API response:', JSON.stringify(data, null, 2));
+        throw new Error('Gemini API returned no candidates. The content may have been blocked or the model is unavailable.');
+    }
+    
+    if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+        console.error('Gemini API response:', JSON.stringify(data, null, 2));
+        throw new Error('Gemini API returned malformed response. Check if content was blocked.');
+    }
+    
     const resultText = data.candidates[0].content.parts[0].text;
     return JSON.parse(resultText);
 }

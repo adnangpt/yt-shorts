@@ -9,12 +9,11 @@ async function processClip(videoPath, srtPath, startTime, endTime, outputDir, in
     const filterComplex = [
         `[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:10[bg]`,
         `[0:v]scale=1080:-1[fg]`,
-        `[bg][fg]overlay=(W-w)/2:(H-h)/2[v]`,
-        `[v]subtitles='${escapedSrtPath}':force_style='Alignment=2,FontSize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Outline=1,Shadow=0'[finalv]`
+        `[bg][fg]overlay=(W-w)/2:(H-h)/2[v]`
     ].join(';');
 
     try {
-        const command = `ffmpeg -ss ${startTime} -to ${endTime} -i "${videoPath}" -filter_complex "${filterComplex}" -map "[finalv]" -map 0:a -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -y "${outputPath}"`;
+        const command = `ffmpeg -ss ${startTime} -to ${endTime} -i "${videoPath}" -filter_complex "${filterComplex}" -map "[v]" -map 0:a -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -y "${outputPath}"`;
         execSync(command, { stdio: 'inherit' });
         return outputPath;
     } catch (error) {
