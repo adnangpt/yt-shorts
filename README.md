@@ -165,6 +165,73 @@ temp/
 
 MIT
 
+## 🤖 Advanced Automation (Hybrid Cloud)
+
+This tool can be configured to run as a fully automated "set-and-forget" platform.
+
+### 1. Database Setup (Supabase)
+
+1. Create a free project at [Supabase](https://supabase.com/).
+2. Run the SQL in `supabase/schema.sql` in the Supabase SQL Editor.
+3. Add your credentials to `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+### 2. Auto-Upload Setup (YouTube API)
+
+To enable automatic uploads to your channel:
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable "YouTube Data API v3".
+3. Create OAuth 2.0 Client IDs.
+4. Get your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+5. Generate a `GOOGLE_REFRESH_TOKEN` (use a tool like [OAuth 2.0 Playground](https://developers.google.com/oauthplayground)).
+6. Add to `.env.local`:
+   ```env
+   GOOGLE_CLIENT_ID=your_id
+   GOOGLE_CLIENT_SECRET=your_secret
+   GOOGLE_REFRESH_TOKEN=your_token
+   ```
+
+### 3. Running the Polling Worker (Powerhouse)
+
+On your gaming laptop (Windows or its own Linux terminal):
+```powershell
+# Set credentials
+$env:SUPABASE_URL="your_url"
+$env:SUPABASE_KEY="your_service_role_key"
+$env:GEMINI_API_KEY="your_key"
+
+# Start the continuous worker
+node worker-scripts/poll-worker.js
+```
+The worker will now check Supabase every 30 seconds for new jobs submitted from your phone or any PC.
+
+### 4. Channel Monitoring (MrBeast Bot)
+
+To automatically generate shorts for a channel:
+1. Add the Channel ID to the `monitored_channels` table in Supabase.
+2. Run the scheduler:
+   ```powershell
+   node worker-scripts/scheduler.js
+   ```
+It will check for new videos every hour and automatically trigger the processing pipeline.
+
+## 📁 Project Structure
+
+- `src/`: Next.js frontend and API
+- `worker-scripts/`: AI and video processing engine
+  - `main.js`: Main pipeline
+  - `poll-worker.js`: Continuous job listener
+  - `scheduler.js`: Channel monitor
+  - `upload.js`: YouTube API uploader
+- `supabase/`: Database schema
+
+## 📝 License
+
+MIT
+
 ## 🙏 Credits
 
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Video downloading

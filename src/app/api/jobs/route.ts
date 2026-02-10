@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { triggerWorkflow } from '@/lib/github';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
     try {
@@ -11,7 +12,22 @@ export async function POST(request: Request) {
 
         const jobId = `short_${Date.now()}`;
 
-        await triggerWorkflow(url, jobId);
+        // 1. Log job in Supabase (for Hybrid Cloud / Mobile access)
+        const { error: dbError } = await supabase
+            .from('jobs')
+            .insert([{
+                id: jobId,
+                youtube_url: url,
+                status: 'pending'
+            }]);
+
+        if (dbError) {
+            console.error('Supabase Error:', dbError);
+            // We continue even if DB fails, to allow GitHub trigger to work as fallback
+        }
+
+        // 2. Optional: Still trigger GitHub Action as a backup
+        // await triggerWorkflow(url, jobId);
 
         return NextResponse.json({ jobId });
     } catch (error: any) {
